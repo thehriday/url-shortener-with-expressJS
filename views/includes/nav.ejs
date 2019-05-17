@@ -14,20 +14,16 @@
 
   <div class="collapse navbar-collapse" id="navbarColor01">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item">
-        <a class="nav-link" href="#"
-          >Home <span class="sr-only">(current)</span></a
+      <li class="nav-item <%= path =='/' ? 'active': ''%>">
+        <a class="nav-link" href="/"
+          >Home</a
         >
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Login</a>
-      </li>
-      <li class="nav-item active">
-        <a class="nav-link" href="/auth/signup">Sign Up</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">About</a>
+      <li class="nav-item <%= path =='/url-shortener' ? 'active': ''%>">
+        <a class="nav-link" href="/url-shortener">Create</a>
       </li>
     </ul>
+    <% if (authUser) {%> <%- include("loggedUserNav") %> <% } else{ %> <%-
+    include("logoutUserNav") %> <% } %>
   </div>
 </nav>

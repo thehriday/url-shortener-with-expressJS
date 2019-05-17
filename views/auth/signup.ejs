@@ -1,8 +1,6 @@
-
 <div class="container">
   <div class="row">
     <div class="col-md-8 mx-auto my-5">
-        <%- include("includes/errors") %> 
       <form action="/auth/signup" method="POST">
           <legend>Please Sign Up</legend>
           <div class="form-group">
@@ -61,8 +59,19 @@
           </div>
           
           <button type="submit" class="btn btn-primary">Register</button>
-          <button class="btn btn-secondary ml-2">Clear</button>
+          <button id="formClear" class="btn btn-secondary ml-2">Clear</button>
       </form>
     </div>
   </div>
 </div>
+<script>
+  // select formClear button ar form
+  const formClear = document.querySelector("#formClear")
+  const form = document.querySelector("form");
+  
+  //when click in formClear button
+  formClear.addEventListener("click",e=>{
+    e.preventDefault();
+    form.reset()
+  })
+</script>

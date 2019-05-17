@@ -7,6 +7,9 @@ const expressValidator = require("express-validator");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const flash = require("connect-flash");
+const User = require("./models/User");
+const shortenerRouter = require("./routes/shortenerRouter")
+
 // database connection
 require("./util/dbConnection");
 
@@ -33,19 +36,38 @@ app.use(express.json());
 app.locals.title = "Url Shortener With Express";
 //express validator
 app.use(expressValidator());
-//set success and errors for validation
-app.use((req,res,next)=>{
-  app.locals.errors = req.flash("errors") || []
-  app.locals.success = req.flash("success") || []
-  next()
-})
+//middle ware
+app.use(async (req, res, next) => {
+  // check, is user login or not
+  if(req.session.authUserId){
+    req.authUser = await User.findById(req.session.authUserId)
+    app.locals.authUser = req.authUser
+    req.userLogin = req.authUser ? true : false
+  }
+  else{
+    app.locals.authUser = null
+  }
+  //set errors and success msg for every page
+  app.locals.errors = req.flash("errors") || [];
+  app.locals.success = req.flash("success") || [];
+  next();
+});
 
 //authentication route
 app.use("/auth", authRoute);
 
-app.get("/set",(req,res)=>{
-  req.session.name = "Hridoy"
-  res.send("Setted")
+//home route
+app.get("/", (req, res) => {
+  res.render("home",{title:"Welcome to Url-Shortener with expressJS",path:"/"})
+});
+
+//shortener route
+app.use(shortenerRouter)
+
+//logout route
+app.get("/logout",(req,res)=>{
+  req.session.authUserId = null
+  res.redirect("/auth/login")
 })
 
 

@@ -3,8 +3,9 @@ const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
 exports.getSignup = (req, res) => {
-  res.render("signup", { title: "Please Sign Up" });
+  res.render("auth/signup", { title: "Please Sign Up",path:"/auth/signup"});
 };
+
 exports.postSignup = async (req, res) => {
   let { name, userName, email, password, confirmPassword } = req.body;
   //name validation
@@ -60,14 +61,55 @@ exports.postSignup = async (req, res) => {
     user
       .save()
       .then(() => {
-        req.flash("success","You have Registered Successfully")
-        res.redirect("back");
+        req.flash("success", "You have Registered Successfully");
+        res.redirect("/auth/login");
       })
       .catch(err => {
         console.log(err);
       });
   } else {
-    req.flash("errors",req.validationErrors())
-    res.redirect("back")
+    req.flash("errors", req.validationErrors());
+    res.redirect("back");
+  }
+};
+
+//login get controller
+exports.getLogin = (req, res) => {
+  res.render("auth/login", { title: "Please Login", path:"/auth/login"});
+};
+
+//login post controller
+exports.postLogin = async (req, res) => {
+  req
+    .check("email", "Email is required")
+    .not()
+    .isEmpty();
+  req
+    .check("password", "Password is required")
+    .not()
+    .isEmpty();
+
+  if (!req.validationErrors()) {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email })
+    if (!user){
+      req.flash("errors",[{msg:"Email is not found"}])
+      res.redirect("back")
+    }
+    else{
+      const authUser = await bcrypt.compare(password,user.password)
+      if(authUser){
+        req.flash("success","You have logged in successfully")
+        req.session.authUserId = user._id
+      }
+      else{
+        req.flash("errors",[{msg:"Password is incorrect"}])
+      }
+      res.redirect("back")
+    }
+     
+  } else {
+    req.flash("errors", req.validationErrors());
+    res.redirect("back");
   }
 };

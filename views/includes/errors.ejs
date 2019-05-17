@@ -1,12 +1,22 @@
-<% errors.forEach(error=>{ %>
-<div class="alert alert-dismissible alert-primary">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong><%= error.msg %></strong>
-</div>
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6 mx-auto">
+      <% errors.forEach(error=>{ %>
+      <div class="alert alert-dismissible alert-primary">
+        <button type="button" class="close" data-dismiss="alert">
+          &times;
+        </button>
+        <strong><%= error.msg %></strong>
+      </div>
 
-<% }) %> <% if(success.length>0){ %>
-<div class="alert alert-dismissible alert-success">
-  <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <strong><%= success %></strong>
+      <% }) %> <% if(success.length>0){ %>
+      <div class="alert alert-dismissible alert-success">
+        <button type="button" class="close" data-dismiss="alert">
+          &times;
+        </button>
+        <strong><%= success %></strong>
+      </div>
+      <% } %>
+    </div>
+  </div>
 </div>
-<% } %>
