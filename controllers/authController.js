@@ -1,6 +1,8 @@
 const User = require("../models/User");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const passport = require("passport")
+
 
 exports.getSignup = (req, res) => {
   res.render("auth/signup", { title: "Please Sign Up",path:"/auth/signup"});
@@ -78,38 +80,12 @@ exports.getLogin = (req, res) => {
   res.render("auth/login", { title: "Please Login", path:"/auth/login"});
 };
 
-//login post controller
-exports.postLogin = async (req, res) => {
-  req
-    .check("email", "Email is required")
-    .not()
-    .isEmpty();
-  req
-    .check("password", "Password is required")
-    .not()
-    .isEmpty();
-
-  if (!req.validationErrors()) {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email })
-    if (!user){
-      req.flash("errors",[{msg:"Email is not found"}])
-      res.redirect("back")
-    }
-    else{
-      const authUser = await bcrypt.compare(password,user.password)
-      if(authUser){
-        req.flash("success","You have logged in successfully")
-        req.session.authUserId = user._id
-      }
-      else{
-        req.flash("errors",[{msg:"Password is incorrect"}])
-      }
-      res.redirect("back")
-    }
-     
-  } else {
-    req.flash("errors", req.validationErrors());
-    res.redirect("back");
-  }
+// login post controller
+exports.postLogin = (req, res,next) => {
+  passport.authenticate("local",{
+    successRedirect:"/",
+    failureRedirect:"/auth/login",
+    failureFlash:true
+  })(req,res,next)
 };
+

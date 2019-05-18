@@ -1,5 +1,5 @@
 module.exports = (req,res,next)=>{
-    if (req.userLogin){
+    if (req.isAuthenticated()){
         return res.redirect("/")
     }
     next()

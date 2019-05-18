@@ -8,8 +8,12 @@ const mongoose = require("mongoose");
 const session = require("express-session");
 const flash = require("connect-flash");
 const User = require("./models/User");
-const shortenerRouter = require("./routes/shortenerRouter")
+const shortenerRouter = require("./routes/shortenerRouter");
+const passport = require("passport")
 
+
+//local strategy
+require("./passport/passport")
 // database connection
 require("./util/dbConnection");
 
@@ -23,6 +27,9 @@ app.use(
 );
 //flash middleware
 app.use(flash());
+//passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
 //set static directory
 app.use(express.static("public"));
 //set view engine to ejs
@@ -38,17 +45,17 @@ app.locals.title = "Url Shortener With Express";
 app.use(expressValidator());
 //middle ware
 app.use(async (req, res, next) => {
+  
   // check, is user login or not
-  if(req.session.authUserId){
-    req.authUser = await User.findById(req.session.authUserId)
-    app.locals.authUser = req.authUser
-    req.userLogin = req.authUser ? true : false
+  if (req.isAuthenticated()) {
+    app.locals.authUser = req.user;
+  }else{
+    app.locals.authUser = false
   }
-  else{
-    app.locals.authUser = null
-  }
+  
   //set errors and success msg for every page
-  app.locals.errors = req.flash("errors") || [];
+  app.locals.errors = req.flash("errors") || []
+  app.locals.error = req.flash("error") || []
   app.locals.success = req.flash("success") || [];
   next();
 });
@@ -58,18 +65,20 @@ app.use("/auth", authRoute);
 
 //home route
 app.get("/", (req, res) => {
-  res.render("home",{title:"Welcome to Url-Shortener with expressJS",path:"/"})
+  res.render("home", {
+    title: "Welcome to Url-Shortener with expressJS",
+    path: "/"
+  });
 });
 
 //shortener route
-app.use(shortenerRouter)
+app.use(shortenerRouter);
 
 //logout route
-app.get("/logout",(req,res)=>{
-  req.session.authUserId = null
-  res.redirect("/auth/login")
-})
-
+app.get("/logout", (req, res) => {
+  req.logOut()
+  res.redirect("/auth/login");
+});
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
