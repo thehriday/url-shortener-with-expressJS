@@ -1,15 +1,17 @@
 const User = require("../models/User");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
-const passport = require("passport")
-
+const passport = require("passport");
+const path = require("path");
+const mongoose = require("mongoose");
 
 exports.getSignup = (req, res) => {
-  res.render("auth/signup", { title: "Please Sign Up",path:"/auth/signup"});
+  res.render("auth/signup", { title: "Please Sign Up", path: "/auth/signup" });
 };
 
 exports.postSignup = async (req, res) => {
   let { name, userName, email, password, confirmPassword } = req.body;
+
   //name validation
   if (name.length === 0) {
     req.check("name", "Name is required").custom(() => false);
@@ -56,19 +58,45 @@ exports.postSignup = async (req, res) => {
       .check("password", "Password and confirm Password are not match")
       .equals(confirmPassword);
   }
+
+  //photo validation
+  const { photo } = req.files;
+
+  const photoType = [".jpg", ".jpeg", ".png", ".gif"];
+  const photoExt = path.extname(photo.name);
+  //type validation and size validation
+  if (photo.name) {
+    if (!photoType.includes(photoExt)) {
+      req.check("photo", "You have to upload a photo").custom(() => false);
+    } else if (photo.size > 1000 * 1000 * 2) {
+      req
+        .check("photo", "photo size must be less then 2MB.")
+        .custom(() => false);
+    }
+  }
+
   // store to database
   if (!req.validationErrors()) {
     password = bcrypt.hashSync(password);
-    const user = User({ name, userName, email, password });
+    const user = User({_id: new mongoose.Types.ObjectId(), name, userName, email, password });
+    // save profile photo
+    if (photo.name) {
+      const photoLink = user._id + photoExt;
+      photo.mv(path.join("public", "photos", photoLink), err => {
+        if (err) {
+          console.log("error happend to save photo");
+        }
+      });
+      user.photoLink = photoLink;
+    }
+    // save user to database
     user
       .save()
       .then(() => {
         req.flash("success", "You have Registered Successfully");
         res.redirect("/auth/login");
       })
-      .catch(err => {
-        console.log(err);
-      });
+      .catch(err => console.log(err));
   } else {
     req.flash("errors", req.validationErrors());
     res.redirect("back");
@@ -77,15 +105,14 @@ exports.postSignup = async (req, res) => {
 
 //login get controller
 exports.getLogin = (req, res) => {
-  res.render("auth/login", { title: "Please Login", path:"/auth/login"});
+  res.render("auth/login", { title: "Please Login", path: "/auth/login" });
 };
 
 // login post controller
-exports.postLogin = (req, res,next) => {
-  passport.authenticate("local",{
-    successRedirect:"/",
-    failureRedirect:"/auth/login",
-    failureFlash:true
-  })(req,res,next)
+exports.postLogin = (req, res, next) => {
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/auth/login",
+    failureFlash: true
+  })(req, res, next);
 };
-

@@ -1,10 +1,17 @@
-<div class="dropdown mr-4">
+<div class="dropdown d-flex mr-4">
   <button
-    class="btn btn-secondary dropdown-toggle"
+    class="btn btn-primary"
     data-toggle="dropdown"
     aria-haspopup="true"
     aria-expanded="false"
+    style="color:white; background:transparent"
   >
+    <img
+      class="mr-1"
+      style="width:40px;border-radius:50%;"
+      src="/photos/<%= authUser.photoLink %>"
+      alt="<%= authUser.name %>"
+    />
     <%= authUser.name %>
   </button>
   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
