@@ -28,6 +28,6 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((id, done) => {
   User.findById(id, (err, user) => {
-    return done(err, user);
+    return done(null, user);
   });
 });

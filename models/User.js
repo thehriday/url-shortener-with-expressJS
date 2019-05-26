@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
     userName:String,
     email:String,
     password:String,
+    forgotPasswordToken:String,
+    forgotPasswordTime:Date,
     photoLink:{
         type: String,
         default:"avatar.png"
